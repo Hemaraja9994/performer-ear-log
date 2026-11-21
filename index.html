@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Performer Ear Log</title>
+<meta name="description" content="A noise-dose and ear-symptom log for chenda, dhol and band drummers, musicians, DJs and festival performers.">
+<meta name="theme-color" content="#17212E">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="kit.css">
+<style>
+.week{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center}
+.dose{font-size:2.6rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.meter{height:16px;background:var(--track);border-radius:8px;overflow:hidden;margin-top:8px}
+.meter i{display:block;height:100%}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="brand"><img src="icon.svg" width="34" height="34" alt=""><h1><span data-i18n="appName"></span><small data-i18n="appSub"></small></h1></div>
+  <div class="top-tools"><span class="net" id="net" role="status" aria-live="polite"></span><label class="sr" for="lang">Language</label><select id="lang" class="lang"></select></div>
+</div></header>
+
+<main class="wrap">
+  <section class="intro">
+    <h2>Your hearing is your instrument too</h2>
+    <p>Drummers, nadaswaram and band players, DJs and sound crews are exposed to some of the loudest sound anywhere, for hours at a festival. Log rehearsals and performances, whether you wore ear protection, and how your ears felt afterwards. Repeated ringing or muffled hearing is an early warning.</p>
+  </section>
+
+  <section class="panel" aria-labelledby="wTitle">
+    <h3 id="wTitle">Last 7 days</h3>
+    <div class="week" id="week"></div>
+  </section>
+
+  <div class="grid2">
+    <section class="panel" aria-labelledby="lTitle">
+      <h3 id="lTitle">Log a session</h3>
+      <div class="row2">
+        <label class="field" for="date">Date<input type="date" id="date"></label>
+        <label class="field" for="hours">Hours<input type="number" id="hours" min="0.25" max="16" step="0.25" value="2"></label>
+      </div>
+      <label class="field" for="kind">Session<select id="kind"><option>Rehearsal</option><option>Performance</option><option>Festival procession</option><option>Recording or sound check</option><option>Teaching class</option></select></label>
+      <label class="field" for="role">What you play or do<select id="role"></select></label>
+      <label class="field" for="prot">Ear protection<select id="prot"><option value="0">None</option><option value="10">Foam earplugs, well inserted</option><option value="10">Musician's earplugs</option><option value="10">Earmuffs</option></select>
+        <span class="hint">The app assumes 10 dB of real-world protection. Actual protection depends on fit.</span></label>
+      <fieldset><legend>After the session</legend>
+        <label class="check"><input type="checkbox" id="ring"><span>Ringing, buzzing or whistling in the ears</span></label>
+        <label class="check"><input type="checkbox" id="muff"><span>Hearing felt muffled or blocked</span></label>
+      </fieldset>
+      <p class="err" id="err" role="alert"></p>
+      <div class="actions"><button type="button" class="primary" id="add">Add session</button></div>
+    </section>
+
+    <section class="panel" aria-labelledby="hTitle">
+      <h3 id="hTitle">Hearing check</h3>
+      <label class="field" for="lastTest">Last hearing test (audiogram)<input type="date" id="lastTest"></label>
+      <div id="testNote"></div>
+      <div class="callout" style="margin-top:16px"><h4>Protect your hearing and your music</h4><ul>
+        <li>Musician's earplugs lower the volume evenly, so the sound stays natural. Custom-moulded ones fit best.</li>
+        <li>Stand beside or behind loud drums and speakers, not directly in front of them.</li>
+        <li>Rest your ears after a long performance. Quiet time helps the ears recover.</li>
+        <li>Get a hearing test once a year, and sooner if ringing or muffled hearing does not clear within a day.</li></ul></div>
+    </section>
+  </div>
+
+  <section class="panel" aria-labelledby="rTitle">
+    <div class="head-row"><h3 id="rTitle">Sessions</h3><div class="actions" style="margin-top:0"><button type="button" class="small" id="csv">Download CSV</button></div></div>
+    <div class="table-scroll" id="list"></div>
+  </section>
+</main>
+
+<footer><div class="wrap">
+  <p data-i18n="disclaimer"></p>
+  <p class="small-text">Weekly allowance from the WHO-ITU H.870 safe listening standard (80 dBA for 40 hours a week, 3 dB exchange rate). Sound levels are typical estimates for each role, not measurements. Musicians have a higher risk of hearing loss and tinnitus than the general population: Schink T et al. Incidence and relative risk of hearing disorders in professional musicians. Occup Environ Med 2014;71(7):472–476.</p>
+  <p>Data stays in this browser only.</p>
+  <p id="credit"></p>
+</div></footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="kit.js"></script>
+<script>
+const I18N_APP = { en:{ appName:"Performer Ear Log", appSub:"Noise dose and ear checks for musicians",
+  disclaimer:"An awareness tool, not a hearing test. See an RCI-registered audiologist for a hearing assessment." } };
+const KEY = "pel-log", TEST_KEY = "pel-lasttest";
+// Typical levels at the performer's ears (approximate, dBA)
+const ROLES = [["Chenda, thavil or dhol",108],["Band drums or drum kit",104],["Nadaswaram, trumpet or other loud wind",100],["DJ, sound engineer or speaker crew",100],["Singer or player near loud speakers",95],["Mridangam, tabla or acoustic ensemble",90],["Teacher in a percussion class",92]];
+let log = store.get(KEY, []);
+const allowedH = L => 40 * Math.pow(10, (80 - L) / 10);
+const dose = e => e.hours / allowedH(e.db - e.prot);
+const DAY = 864e5;
+const recent = n => log.filter(e => (Date.now() - new Date(e.date)) / DAY < n);
+
+function render(){
+  $("#role").innerHTML = $("#role").innerHTML || ROLES.map(([r,db],i)=>`<option value="${i}">${esc(r)} (~${db} dBA)</option>`).join("");
+  if (!$("#date").value) $("#date").value = todayISO();
+  const lt = store.get(TEST_KEY, ""); if (document.activeElement !== $("#lastTest")) $("#lastTest").value = lt;
+  const w = recent(7), f = w.reduce((s,e) => s + dose(e), 0), pct = Math.round(f*100);
+  const col = f >= 1 ? "var(--high)" : f >= .75 ? "var(--mid)" : "var(--ok)";
+  const symp = recent(30).filter(e => e.ring || e.muff).length;
+  $("#week").innerHTML = `<div><div class="dose" style="color:${col}">${pct}%</div><div class="muted small-text">of the weekly safe allowance${f >= 2 ? `<br>about ${Math.round(f)} weeks' worth` : ""}</div></div>
+    <div><div class="meter"><i style="width:${Math.min(100,pct)}%;background:${col}"></i></div>
+    <p style="margin:8px 0 0">${w.length} session${w.length===1?"":"s"}, ${w.reduce((s,e)=>s+e.hours,0)} hours. ${f >= 1 ? "Over the allowance: plan quieter days and use protection at every session." : f >= .75 ? "Close to the allowance. Use protection and rest your ears." : "Within the allowance."}</p>
+    ${symp >= 2 ? `<div class="callout high small-text"><b>Ear symptoms after ${symp} sessions in the last 30 days.</b> This is a warning sign of noise damage. Book a hearing test and use protection every time.</div>` : ""}</div>`;
+  const months = lt ? (Date.now() - new Date(lt)) / (30.44*DAY) : null;
+  $("#testNote").innerHTML = lt == null || lt === "" ? `<p class="muted small-text">Add the date of your last hearing test to get a reminder.</p>`
+    : months > 12 ? `<div class="callout mid small-text">Your last test was over a year ago. Book a hearing test.</div>` : `<p class="small-text"><span class="pill ok">Up to date</span> Next test due ${esc(fmtDate(new Date(new Date(lt).getTime()+365*DAY)))}.</p>`;
+  $("#list").innerHTML = log.length ? `<table class="rec"><thead><tr><th>Date</th><th>Session</th><th>Hours</th><th>Protection</th><th>Allowance</th><th>Ears after</th><th></th></tr></thead><tbody>${log.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(e => `<tr><td>${esc(fmtDate(e.date))}</td><td>${esc(e.kind)}<br><span class="muted small-text">${esc(e.role)}</span></td><td class="num">${e.hours}</td><td>${e.prot ? "Yes" : '<span class="pill mid">None</span>'}</td><td class="num">${Math.round(dose(e)*100)}%</td><td>${[e.ring?"Ringing":"", e.muff?"Muffled":""].filter(Boolean).join(", ") || "Fine"}</td><td><button type="button" class="small danger" data-del="${e.id}">Delete</button></td></tr>`).join("")}</tbody></table>` : `<p class="muted">No sessions yet.</p>`;
+}
+$("#add").addEventListener("click", () => {
+  const h = Number($("#hours").value); if (!(h > 0 && h <= 16)){ $("#err").textContent = "Enter hours between 0.25 and 16."; return; }
+  $("#err").textContent = "";
+  const [role, db] = ROLES[Number($("#role").value)];
+  log.push({id:uid(), date:$("#date").value||todayISO(), hours:h, kind:$("#kind").value, role, db, prot:Number($("#prot").value), ring:$("#ring").checked, muff:$("#muff").checked});
+  store.set(KEY, log); $("#ring").checked = $("#muff").checked = false; render(); toast("Session added");
+});
+$("#lastTest").addEventListener("change", e => { store.set(TEST_KEY, e.target.value); render(); });
+$("#list").addEventListener("click", e => { if (!e.target.dataset.del) return; log = log.filter(x => x.id !== e.target.dataset.del); store.set(KEY, log); render(); toast("Deleted"); });
+$("#csv").addEventListener("click", () => downloadCSV([["date","session","role","level_dBA_estimate","hours","protection_dB","allowance_percent","ringing","muffled"], ...log.map(e => [e.date,e.kind,e.role,e.db,e.hours,e.prot,Math.round(dose(e)*100),e.ring?"yes":"no",e.muff?"yes":"no"])], `performer-ear-log-${todayISO()}.csv`));
+
+KIT.start({ i18n: I18N_APP, render, version: "0.1.0" });
+</script>
+</body>
+</html>
