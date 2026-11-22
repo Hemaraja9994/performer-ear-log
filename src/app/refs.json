@@ -1,0 +1,17 @@
+[
+  { "id": "who-itu", "title": "Safe listening levels (WHO–ITU)", "tags": ["safe listening", "who", "itu", "dose", "80 dB", "allowance", "sound level"],
+    "text": "WHO and ITU define a weekly sound allowance using a reference of 80 dB(A) for 40 hours a week, with the allowance halving for every 3 dB increase in level (the equal-energy principle). Louder exposure uses the allowance up much faster, so an hour of very loud music can equal a whole week's safe dose.",
+    "source": "ITU-T H.870 / WHO global standard for safe listening devices and systems", "year": 2019, "url": "https://www.who.int/publications/i/item/9789241515276", "checked": "Nov 2026" },
+  { "id": "niosh", "title": "Occupational noise limits", "tags": ["niosh", "noise", "occupational", "85 dB", "exchange rate", "exposure", "hours"],
+    "text": "For occupational noise NIOSH recommends 85 dB(A) averaged over 8 hours, with a 3 dB exchange rate: every 3 dB rise halves the safe time. Many live-music and procession settings exceed 100 dB(A), where safe time is only a few minutes.",
+    "source": "National Institute for Occupational Safety and Health. Criteria for a recommended standard: occupational noise exposure", "year": 1998, "url": "https://www.cdc.gov/niosh/docs/98-126/", "checked": "Nov 2026" },
+  { "id": "protection", "title": "Hearing protection for musicians", "tags": ["earplugs", "protection", "musician", "flat", "attenuation", "db reduction"],
+    "text": "Musicians' earplugs with a flat (uniform) attenuation of about 15–25 dB lower the level reaching the ear while keeping sound balanced, so music still sounds natural. Worn consistently, they multiply the time you can play safely. Foam plugs protect more but muffle high notes.",
+    "source": "Chasin M. Hearing loss in musicians. San Diego: Plural Publishing", "year": 2009, "checked": "Nov 2026" },
+  { "id": "tinnitus", "title": "Ringing and muffled hearing are warnings", "tags": ["tinnitus", "ringing", "muffled", "temporary threshold shift", "symptom", "warning", "damage"],
+    "text": "Ringing (tinnitus) or a muffled, blocked feeling after loud music is a temporary threshold shift: a sign the ear has been overloaded. Repeated shifts can become permanent hearing loss and lasting tinnitus. Recurring symptoms mean the exposure is too high — reduce level or time and use protection.",
+    "source": "World Health Organization. Make Listening Safe", "year": 2022, "url": "https://www.who.int/activities/making-listening-safe", "checked": "Nov 2026" },
+  { "id": "checkup", "title": "Regular hearing checks for performers", "tags": ["hearing test", "audiogram", "monitoring", "yearly", "baseline", "checkup"],
+    "text": "Performers exposed to loud music should have a baseline hearing test and then a check at least once a year, so early high-frequency changes are caught before they affect speech. An RCI-registered audiologist can advise on custom protection and in-ear monitoring.",
+    "source": "World Health Organization. World report on hearing", "year": 2021, "url": "https://www.who.int/publications/i/item/9789240020481", "checked": "Nov 2026" }
+]
